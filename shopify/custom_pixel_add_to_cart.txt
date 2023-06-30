@@ -1,0 +1,88 @@
+((fueledConfig) => {
+  function loadScript(src) {
+    const script = document.createElement("script");
+    script.src = src;
+    document.head.appendChild(script);
+  }
+
+  loadScript(`https://www.googletagmanager.com/gtag/js?id=${fueledConfig.gTarget}`);
+  loadScript(`https://cdn-client.fueled.io/fueled-client-1.5.2.min.js`);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    window.dataLayer.push(arguments);
+  }
+
+  gtag("js", new Date());
+  gtag("config", fueledConfig.gTarget, { send_page_view: false });
+  window.gtag = gtag;
+
+  const status = {
+    fueledReady: false,
+    ga4Ready: false,
+    setStatus(property) {
+      this[property] = true;
+
+      if (Object.values(this).every((item) => item)) {
+        loadClient();
+      }
+    },
+  };
+
+  const ga4IntervalCheckId = setInterval(() => {
+    if (
+      window.google_tag_manager &&
+      window.google_tag_manager.dataLayer &&
+      window.google_tag_manager.dataLayer.gtmLoad &&
+      window.google_tag_manager.dataLayer.gtmDom
+    ) {
+      status.setStatus("ga4Ready");
+
+      clearInterval(ga4IntervalCheckId);
+    }
+  }, 500);
+
+  window.addEventListener("fueled-ready", function () {
+    status.setStatus("fueledReady");
+  });
+
+  async function loadClient() {
+    if (fueledConfig.gTarget) {
+      await window.fueledClient.loadGA4(fueledConfig.gTarget);
+    }
+
+    if (fueledConfig.analyticsWriteKey) {
+        await window.fueledClient.loadClient(fueledConfig.datahubUrl, fueledConfig.analyticsWriteKey, {
+          gTarget: fueledConfig.gTarget,
+        });
+    }
+  }
+
+  dataLayer.fueled = {};
+
+  analytics.subscribe("product_added_to_cart", (event) => {
+    const quantity = event.data.cartLine.quantity;
+    const products = event.data.cartLine.merchandise;
+
+    const product = {
+      productId: products.product.id,
+      sku: products.sku,
+      variant: products.id,
+      price: products.price.amount,
+      category: products.product.type,
+      brand: products.product.vendor,
+      name: products.product.title,
+      imageUrl: products.image.src,
+    };
+
+    window.fueledClient.productAdded({
+      ...product,
+      quantity
+    });
+  });
+})({
+  datahubUrl: "https://datahub.fueled.io",
+  frontendStorageUrl: "https://frontend-storage.fueled.io",
+  analyticsWriteKey: "[[PROD_ANALYTICS_WRITE_KEY]]",
+  gTarget: "[[PROD_GTARGET]]",
+});
