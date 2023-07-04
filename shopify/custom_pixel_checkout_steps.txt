@@ -1,0 +1,63 @@
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer', 'GTM-XXXXXXX');
+
+window.dataLayer = window.dataLayer || [];
+
+analytics.subscribe('checkout_contact_info_submitted', (event) => {
+  window.dataLayer.push({
+    'event': 'checkout_contact_info_submitted',
+    'page_location': event.context.window.location.href,
+    'page_title': event.context.document.title,
+    'checkoutId': event.data.checkout.token,
+    'currencyCode': event.data.checkout.currencyCode,
+    'subtotal': event.data.checkout.subtotalPrice.amount,
+    'totalPrice': event.data.checkout.totalPrice.amount,
+    'totalTax': event.data.checkout.totalTax.amount,
+    'lineItems': event.data.checkout.lineItems,
+  });
+});
+
+analytics.subscribe('checkout_address_info_submitted', (event) => {
+  window.dataLayer.push({
+    'event': 'checkout_address_info_submitted',
+    'page_location': event.context.window.location.href,
+    'page_title': event.context.document.title,
+    'checkoutId': event.data.checkout.token,
+    'currencyCode': event.data.checkout.currencyCode,
+    'subtotal': event.data.checkout.subtotalPrice.amount,
+    'totalPrice': event.data.checkout.totalPrice.amount,
+    'totalTax': event.data.checkout.totalTax,
+    'lineItems': event.data.checkout.lineItems.amount,
+  });
+});
+
+analytics.subscribe('checkout_shipping_info_submitted', (event) => {
+  window.dataLayer.push({
+    'event': 'checkout_shipping_info_submitted',
+    'page_location': event.context.window.location.href,
+    'page_title': event.context.document.title,
+    'checkoutId': event.data.checkout.token,
+    'currencyCode': event.data.checkout.currencyCode,
+    'subtotal': event.data.checkout.subtotalPrice.amount,
+    'totalPrice': event.data.checkout.totalPrice.amount,
+    'totalTax': event.data.checkout.totalTax.amount,
+    'lineItems': event.data.checkout.lineItems,
+  });
+});
+
+analytics.subscribe('payment_info_submitted', (event) => {
+  window.dataLayer.push({
+    'event': 'payment_info_submitted',
+    'page_location': event.context.window.location.href,
+    'page_title': event.context.document.title,
+    'checkoutId': event.data.checkout.token,
+    'currencyCode': event.data.checkout.currencyCode,
+    'subtotal': event.data.checkout.subtotalPrice.amount,
+    'totalPrice': event.data.checkout.totalPrice.amount,
+    'totalTax': event.data.checkout.totalTax.amount,
+    'lineItems': event.data.checkout.lineItems,
+  });
+});
