@@ -1,0 +1,56 @@
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-XXXXXXXX', { allow_enhanced_conversions: true });
+</script>
+
+<!-- Event snippet for Fueled Enhanced Conversions conversion page -->
+<script>
+async function digestMessage(message) {
+  const msgUint8 = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex;
+}
+
+async function getOrderDetail(){
+	const response = await fetch("/api/storefront/order/{{checkout.order.id}}", {
+		credentials: "include",
+    });
+    return response.json();
+}
+
+getOrderDetail().then(async orderDetail => {
+    const { billingAddress } = orderDetail;
+    const userDataAddress = {
+        sha256_first_name: billingAddress.firstName ? await digestMessage(billingAddress.firstName) : undefined,
+        sha256_last_name: billingAddress.lastName ? await digestMessage(billingAddress.lastName) : undefined,
+        city: billingAddress.city,
+        region: billingAddress.stateOrProvince,
+        postal_code: billingAddress.postalCode,
+        country: billingAddress.countryCode,
+    };
+    const userData = {
+        sha256_email_address: billingAddress.email ? await digestMessage(billingAddress.email.toLowerCase()) : undefined,
+        sha256_phone_number: billingAddress.phone && billingAddress.countryCode == 'US' ? await digestMessage("+1" + billingAddress.phone) : undefined,
+        address: userDataAddress,
+    };
+    const filteredUserData = Object.fromEntries(
+        Object.entries(userData).filter(([key, value]) => value !== undefined)
+    );
+
+    gtag("set", "user_data", filteredUserData);
+	gtag('event', 'conversion', {
+		'send_to': 'AW-XXXXXXXX/XXXXXXXX',
+		'value': orderDetail.orderAmount - orderDetail.taxTotal - orderDetail.shippingCostTotal,
+		'currency': orderDetail.currency.code,
+		'transaction_id': orderDetail.orderId
+	});
+})
+</script>
