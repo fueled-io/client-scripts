@@ -4,9 +4,9 @@
   const getPage = () => "{{page_type}}";
   const getOrderId = () => {{checkout.order.id}};
 
-window.addEventListener('fueled-ready', () => {
-  window.fueled.setDataLayerItem('page', getPage());  
-  window.fueled.setDataLayerItem('order_id', getOrderId());
-});
+  window.addEventListener('fueled-load', () => {
+    window.Fueled.setDataLayerItem('page', getPage());  
+    window.Fueled.setDataLayerItem('order_id', getOrderId());
+  });
 
 </script>
