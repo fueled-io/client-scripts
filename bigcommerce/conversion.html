@@ -1,12 +1,12 @@
-  <script defer src="[...]bc-fueled-client-2.0.0.min.js?mb=[...]&mid=[...]" ></script>script
+<script defer src="[...]bc-fueled-client-2.0.0.min.js?mb=[...]&mid=[...]" ></script>
 
 <script>
   const getPage = () => "{{page_type}}";
-  const getOrderId = () => {{checkout.order.id}};
+  const getOrder = () => ({{#if checkout.order}}{{{json checkout.order}}}{{else}}{}{{/if}});
 
-  window.addEventListener('fueled-load', () => {
-    window.Fueled.setDataLayerItem('page', getPage());  
-    window.Fueled.setDataLayerItem('order_id', getOrderId());
-  });
+window.addEventListener('fueled-load', () => {
+  window.Fueled.setDataLayerItem('page', getPage());  
+  window.Fueled.setDataLayerItem('order', getOrder());
+});
 
 </script>
