@@ -1,0 +1,55 @@
+{% if first_time_accessed %}
+    <script>
+        (function (fueledConfig) {
+            function getProducts() {
+                const products = [];
+                {% for line_item in checkout.line_items %}
+                products.push({
+                    product_id: '{{ line_item.product_id }}',
+                    name: '{{ line_item.title }}',
+                    brand: '{{ line_item.vendor }}',
+                    variant: '{{ line_item.variant.title }}',
+                    quantity: {{ line_item.quantity }},
+                    price: {{ line_item.original_price | divided_by: 100.0 }},
+                    position: {{ forloop.index }},
+                    url: '{{ line_item.variant.url }}',
+                    image_url: '{{ line_item.image.src }}'
+                });
+                {% endfor %}
+                return products;
+            }
+            function getOrder() {
+                return {
+                    currency: '{{ currency }}',
+                    checkout_id: '{{ checkout.id }}',
+                    order_id: '{{ order_number }}',
+                    value: {{ checkout.subtotal_price | divided_by: 100.0 }},
+                    affiliation: 'web',
+                    shipping: {{ checkout.shipping_price | divided_by: 100.0 }},
+                    tax: {{ checkout.tax_price | divided_by: 100.0 }},
+                    discount: {{ checkout.discounts_amount | divided_by: 100.0 }},
+                    products: getProducts()
+                }
+            }
+            async function loadClient() {
+                if (fueledConfig.gTarget) {
+                    await window.fueledClient.loadGA4(fueledConfig.gTarget);
+                    await window.fueledClient._analytics.plugins.disable("client");
+                    await new Promise((r) => setTimeout(r));
+                    const userCanBeTracked = window?.Shopify?.customerPrivacy?.userCanBeTracked();
+                    if (userCanBeTracked || userCanBeTracked === undefined) {
+                        const order = getOrder();
+                        setTimeout(() => {
+                            window.fueledClient.orderCompleted(order);
+                        }, 1000);
+                    }
+                }
+            }
+            window.addEventListener("fueled-client-ready", function () {
+                loadClient();
+            });
+        })({
+            gTarget: 'G-D1VJN222QY',
+        });
+    </script>
+{% endif %}
