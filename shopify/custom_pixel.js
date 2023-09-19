@@ -18,7 +18,7 @@ const events = [
         document.head.appendChild(script);
     }
 
-    loadScript(`https://cdn-client.fueled.io/shopify-fueled-client-2.0.0.min.js?mb=https://mb.fueled.io&mid=${configs.mbid}`);
+    loadScript(`https://cdn-client.fueled.io/shopify-fueled-client-2.2.0.min.js?mb=https://mb.fueled.io&mid=${configs.mbid}`);
 
 
     window.addEventListener('fueled-load', () => {
