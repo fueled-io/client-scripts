@@ -1,3 +1,5 @@
+/* As of October 2023, this script has been deprecated. See our 'custom_pixel.js' file instead. */
+
 ((fueledConfig) => {
   function loadScript(src) {
     const script = document.createElement("script");
