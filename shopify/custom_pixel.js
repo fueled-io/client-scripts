@@ -52,7 +52,7 @@ const ga4ExcludedEvents = ['checkout_started'];
     });
   });
 
-  window.addEventListener("fueled-ready", () => {
+  window.addEventListener("fueled-shopify-ready", () => {
     if (!fueledReady) {
       fueledReady = true;
       events.forEach(event => trackEvent(event));
