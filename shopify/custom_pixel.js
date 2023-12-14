@@ -4,9 +4,7 @@
  */
 const trackEvents = [
   'checkout_started',
-  'product_added_to_cart',
-  'checkout_address_info_submitted',
-  'checkout_shipping_info_submitted',
+  //'product_added_to_cart', /* Uncomment this event if you have disabled Fueled's standard "Add to Cart" tracking in our app configuration. */
   'payment_info_submitted'
 ];
 
@@ -14,7 +12,11 @@ const trackEvents = [
  * Possible events:
  * checkout_started
  */
-const ga4ExcludedEvents = ['checkout_started'];
+const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unless you have disabled Fueled's server-side event tracking entirely. */
+
+/**
+ * Do not touch any of the code below.
+ */
 
 ((configs) => {
 
