@@ -47,7 +47,7 @@ const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unl
       }
     } : null;
 
-    window.fueled.customPixel.trackEvent(event, options);
+    window.fueled.customPixel.trackEvent(event, options, init);
   }
 
   configs.trackEvents.forEach(eventName => {
