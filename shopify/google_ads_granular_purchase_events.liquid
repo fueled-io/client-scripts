@@ -1,0 +1,104 @@
+<!-- BEGIN: Additional Google Ads Conversion Tracking -->
+{% if first_time_accessed  %}
+<script>
+    /*
+    * Add the following snippet as an Additional Checkout Script.
+    * Set the LABEL variables that you need. Leave them empty if you don't need them.
+    * Typically, this script is used for secondary Purchase Conversion Actions.
+    */
+
+    // Add your Google AdWords Conversion ID below. This ID starts with "AW-*";
+    var GOOGLE_ADS_ID = ''; // Update me with the Merchant's AdWords Conversion ID.
+
+    // Add conversion labels for various events
+    var GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_SUBSCRIPTION = ''; // Update me.
+    var GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_ONETIME = ''; // Update me.
+    var GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_FIRSTTIME = ''; // Update me.
+    var GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_RETURNING = ''; // Update me.
+
+    // Function to load and initialize gtag
+    function loadAndInitializeGTag() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        // Add the script to load gtag.js from Google
+        var gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + GOOGLE_ADS_ID;
+        gtagScript.onload = function() {
+            gtag('js', new Date());
+            gtag('config', GOOGLE_ADS_ID);
+        };
+        document.head.appendChild(gtagScript);
+
+        window.gtag = gtag;
+    }
+
+    // Function to fire a Google Ads conversion event with enhanced conversion data
+    async function fireConversionEvent(label, includeEnhancedData = true) {
+        if (label) {
+            // Ensure gtag is loaded and initialized
+            if (typeof window.gtag !== 'function') {
+                loadAndInitializeGTag();
+            }
+
+            // Wait for gtag to be defined in case it has just been injected
+            var checkGTagReady = setInterval(function() {
+                if (typeof window.gtag === 'function') {
+                    clearInterval(checkGTagReady);
+
+                    var conversionData = {
+                        'send_to': GOOGLE_ADS_ID + '/' + label,
+                        'value': {{ checkout.total_price | money_without_currency | json}},
+                        'currency': {{ checkout.currency | json }},
+                        'transaction_id': {{ checkout.order_id | json }},
+                    };
+
+                    // Prepare enhanced conversion data if needed
+                    if (includeEnhancedData) {
+                        var enhancedData = {
+                            first_name: {{ checkout.billing_address.first_name | default: customer.first_name | json }},
+                            last_name: {{ checkout.billing_address.last_name | default: customer.last_name | json }},
+                            email: {{ checkout.email | default: customer.email | json }},
+                            phone_number: {{ checkout.customer.phone | default: checkout.billing_address.phone | json }},
+                            address: {
+                                street: {{ checkout.billing_address.address1 | default: customer.default_address.address1 | json }},
+                                city: {{ checkout.billing_address.city | default: customer.default_address.city | json }},
+                                region: {{ checkout.billing_address.province | default: customer.default_address.province | json }},
+                                country: {{ checkout.billing_address.country_code | default: customer.default_address.country_code | json }},
+                                postal_code: {{ checkout.billing_address.zip | default: customer.default_address.zip | json }}
+                            }
+                        };
+                        conversionData.user_data = enhancedData;
+                    }
+
+                    // Fire Google Ads conversion event
+                    gtag('event', 'conversion', conversionData);
+                }
+            }, 100);
+        }
+    }
+
+    var hasSubscriptions = {% assign subscription_found = false %}{% for line_item in checkout.line_items %}{% if line_item.selling_plan_allocation.selling_plan %}{% assign subscription_found = true %}{% break %}{% endif %}{% endfor %}{{ subscription_found | json }};
+    var orderCount = {{ customer.orders_count }};
+
+    if (hasSubscriptions && GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_SUBSCRIPTION) {
+        fireConversionEvent(GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_SUBSCRIPTION);
+        console.log("Google Ads conversion with one or more subscription line items.")
+    } else if (GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_ONETIME) {
+        fireConversionEvent(GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_ONETIME);
+        console.log("Google Ads conversion that does not contain subscriptions on any line items.")
+    }
+
+    if (orderCount === 1 && GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_FIRSTTIME) {
+        fireConversionEvent(GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_FIRSTTIME);
+        console.log("Google Ads conversion for a first-time purchase.")
+    } else if (orderCount > 1 && GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_RETURNING) {
+        fireConversionEvent(GOOGLE_ADS_LABEL_CHECKOUT_COMPLETED_RETURNING);
+        console.log("Google Ads conversion for a repeat purchase.")
+    }
+</script>
+{% endif %}
+<!-- END: Additional Google Ads Conversion Tracking -->
