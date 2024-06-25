@@ -1,0 +1,120 @@
+<!-- BEGIN: Fueled Supplemental Data Layer & Checkout Script Variables -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  var customerData = {};
+
+  {% if checkout.customer.id or customer.id %}
+    customerData.customer_id = {{ checkout.customer.id | default: customer.id | json }};
+  {% endif %}
+  {% if checkout.email or customer.email %}
+    customerData.customer_email = {{ checkout.email | default: customer.email | json }};
+  {% endif %}
+  {% if checkout.billing_address.first_name or customer.first_name %}
+    customerData.customer_first_name = {{ checkout.billing_address.first_name | default: customer.first_name | json }};
+  {% endif %}
+  {% if checkout.billing_address.last_name or customer.last_name %}
+    customerData.customer_last_name = {{ checkout.billing_address.last_name | default: customer.last_name | json }};
+  {% endif %}
+  {% if checkout.customer.phone or checkout.billing_address.phone or checkout.shipping_address.phone or customer.phone %}
+    customerData.customer_phone = {{ checkout.customer.phone | default: checkout.billing_address.phone | json }};
+  {% endif %}
+  {% if checkout.billing_address.city or customer.default_address.city %}
+    customerData.customer_city = {{ checkout.billing_address.city | default: customer.default_address.city | json }};
+  {% endif %}
+  {% if checkout.billing_address.zip or customer.default_address.zip %}
+    customerData.customer_zip = {{ checkout.billing_address.zip | default: customer.default_address.zip | json }};
+  {% endif %}
+  {% if checkout.billing_address.address1 or customer.default_address.address1 %}
+    customerData.customer_address_1 = {{ checkout.billing_address.address1 | default: customer.default_address.address1 | json }};
+  {% endif %}
+  {% if checkout.billing_address.address2 or customer.default_address.address2 %}
+    customerData.customer_address_2 = {{ checkout.billing_address.address2 | default: customer.default_address.address2 | json }};
+  {% endif %}
+  {% if checkout.billing_address.country or customer.default_address.country %}
+    customerData.customer_country = {{ checkout.billing_address.country | default: customer.default_address.country | json }};
+  {% endif %}
+  {% if checkout.billing_address.country_code or customer.default_address.country_code %}
+    customerData.customer_country_code = {{ checkout.billing_address.country_code | default: customer.default_address.country_code | json }};
+  {% endif %}
+  {% if checkout.billing_address.province or customer.default_address.province %}
+    customerData.customer_province = {{ checkout.billing_address.province | default: customer.default_address.province | json }};
+  {% endif %}
+  {% if checkout.billing_address.province_code or customer.default_address.province_code %}
+    customerData.customer_province_code = {{ checkout.billing_address.province_code | default: customer.default_address.province_code | json }};
+  {% endif %}
+  {% if checkout.customer.tags or customer.tags %}
+    customerData.customer_tags = {{ checkout.customer.tags | default: customer.tags | json }};
+  {% endif %}
+  {% if customer.orders_count > 0 %}
+    customerData.total_spend = {{ customer.total_spent | divided_by: 100.0 }};
+    customerData.orders_count = {{ customer.orders_count }};
+  {% endif %}
+  {% if customer %}
+    var customerType = {% if customer.orders_count > 1 %}"returning"{% else %}"new"{% endif %};
+    customerData.customer_type = customerType;
+  {% endif %}
+
+  // Function to build and return the order data object
+  function buildOrderData() {
+
+    // Check if any order line items have a subscription attached to them.
+    var includesSubscription = {% assign subscription_found = false %}{% for line_item in checkout.line_items %}{% if line_item.selling_plan_allocation.selling_plan %}{% assign subscription_found = true %}{% break %}{% endif %}{% endfor %}{{ subscription_found | json }};
+    // Calculate the total quantity of all line items
+    var totalQuantity = {% assign total_quantity = 0 %}{% for line_item in checkout.line_items %}{% assign total_quantity = total_quantity | plus: line_item.quantity %}{% endfor %}{{ total_quantity }};
+
+    return {
+      checkout_id: {{ checkout.id | json }},
+      order_id: {% if checkout.order_id %}{{ checkout.order_id | json }}{% else %}{{ order.id | json }}{% endif %},
+      order_number: {{ checkout.order_number | json }},
+      order_name: {% if checkout.order_name %}{{ checkout.order_name | json }}{% else %}"N/A"{% endif %},
+      shop_name: {{ shop.name | json }},
+      revenue: {{ checkout.total_price | money_without_currency }},
+      currency: {{ checkout.currency | json }},
+      tax: {{ checkout.tax_price | money_without_currency }},
+      shipping: {{ checkout.shipping_price | money_without_currency }},
+      order_subtotal: {% if order and order.subtotal_price %}{{ order.subtotal_price | money_without_currency }}{% else %}{{ checkout.line_items_subtotal_price | money_without_currency }}{% endif %},
+      order_line_items_subtotal: {{ checkout.line_items_subtotal_price | money_without_currency }},
+      order_total_product_count: totalQuantity,
+      discount_amount: {{ checkout.discount_applications | map: 'total_allocated_amount' | first | default: 0 | money_without_currency }},
+      coupon: {% if checkout.discount_applications %}{{ checkout.discount_applications[0].title | json }}{% else %}""{% endif %},
+      includes_subscription: includesSubscription
+    };
+  }
+
+  // Function to build and return the items data array
+  function buildItemsData() {
+    var items = [];
+    {% for line_item in checkout.line_items %}
+    items.push({
+      name: {{ line_item.product.title | json }},
+      product_id: {{ line_item.product_id | json }},
+      variant: {{ line_item.variant.title | json }},
+      variant_id: {{ line_item.variant_id | json }},
+      sku: {{ line_item.sku | json }},
+      brand: {{ line_item.vendor | json }},
+      category: {{ line_item.product.type | json }},
+      price: {{ line_item.final_price | money_without_currency }},
+      line_item_discount: {{ line_item.total_discount | money_without_currency }},
+      original_price: {{ line_item.original_price | money_without_currency }},
+      quantity: {{ line_item.quantity | json }},
+      subscription_line_item: {% if line_item.selling_plan_allocation.selling_plan %}true{% else %}false{% endif %}
+    });
+    {% endfor %}
+    return items;
+  }
+
+  // Use functions to initialize orderData and itemsData
+  var orderData = buildOrderData();
+  var itemsData = buildItemsData();
+
+  window.dataLayer.push({
+    fueled: {
+      customer: customerData,
+      order: orderData,
+      orderItems: itemsData
+    }
+  });
+
+</script>
+<!-- END: Fueled Supplemental Data Layer & Checkout Script Variables -->
