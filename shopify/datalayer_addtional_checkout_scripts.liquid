@@ -47,6 +47,7 @@
     customerData.customer_tags = {{ checkout.customer.tags | default: customer.tags | json }};
   {% endif %}
   {% if customer.orders_count > 0 %}
+    customerData.total_spent = {{ customer.total_spent | divided_by: 100.0 }};
     customerData.total_spend = {{ customer.total_spent | divided_by: 100.0 }};
     customerData.orders_count = {{ customer.orders_count }};
   {% endif %}
@@ -108,12 +109,16 @@
   var orderData = buildOrderData();
   var itemsData = buildItemsData();
 
+  // Add additional data to the dataLayer['fueled'] object
+  dataLayer['fueled'] = {
+    customer: customerData,
+    order: orderData,
+    orderItems: itemsData
+  };
+  // Push the event to the data layer
   window.dataLayer.push({
-    fueled: {
-      customer: customerData,
-      order: orderData,
-      orderItems: itemsData
-    }
+    event: 'orderDataLoaded',
+    fueled: dataLayer['fueled']
   });
 
 </script>
