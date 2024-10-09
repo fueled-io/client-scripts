@@ -14,7 +14,8 @@ const trackEvents = [
   'checkout_contact_info_submitted', /* This event fires an identify() event that improves match data. */
   'checkout_address_info_submitted', /* This event fires an identify() event that improves match data. */
   'payment_info_submitted', /* This event fires an "Add Payment Info" event into GA4 and FB. */
-  'checkout_completed' /* This event fires an Identify event into GA4 and FB. */
+  'checkout_completed', /* This event fires an Identify event into GA4 and FB. */
+  'checkout_shipping_info_submitted' /* This event fires checkoutShippingInfoSubmitted track event */
 ];
 
 /**
