@@ -17,15 +17,7 @@ const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unl
 		const script = document.createElement('script');
 		script.src = src;
 		script.async = true;
-
-		const link = document.createElement('link');
-		link.href = src;
-		link.as = 'script';
-		link.rel = 'preload';
-
 		document.head.appendChild(script);
-		document.head.appendChild(link);
-
 		scriptLoaded = true;
 	}
 
