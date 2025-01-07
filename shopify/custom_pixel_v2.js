@@ -9,11 +9,19 @@
  *
  */
 const trackEvents = [
+	'page_viewed',
+	'cart_viewed',
+	'product_viewed',
+	'collection_viewed',
+	'product_added_to_cart',
+	'product_removed_from_cart',
+	'search_submitted',
 	'checkout_started', /* This event fires an 'Initiate Checkout' event for Facebook Pixel/CAPI. */
 	'checkout_contact_info_submitted', /* This event fires an identify() event that improves match data. */ 
 	'checkout_address_info_submitted', /* This event fires an identify() event that improves match data. */
 	'payment_info_submitted', /* This event fires an 'Add Payment Info' event into GA4 and FB. */
 	'checkout_completed', /* This event fires an Identify event into GA4 and FB. */
+	'checkout_shipping_info_submitted'
 ];
 
 /**
@@ -59,7 +67,7 @@ const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unl
 	}
 
 	configs.trackEvents.forEach(eventName => {
-		api.analytics.subscribe(eventName, async (event) => {
+		api.analytics.subscribe('eventName', async (event) => {
 			if (!scriptLoaded) {
 				loadScript('/apps/fueled/client.js?page=custom_pixel_v2');
 			}
