@@ -1,13 +1,3 @@
-/**
- * Possible events:
- * checkout_started
- */
-const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unless you have disabled Fueled's server-side event tracking entirely. */
-
-/**
- * Do not touch any of the code below.
- */
-
 (() => {
 	const events = [];
 	let scriptLoaded = false;
@@ -22,14 +12,7 @@ const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unl
 	}
 
 	function trackEvent(event) {
-		const options = ga4ExcludedEvents.includes(event.name) ? {
-			plugins: {
-				all: true,
-				'google-analytics': false,
-			},
-		} : null;
-
-		window.fueled.customPixelV2.trackEvent({ event, options, api });
+		window.fueled.customPixelV2.trackEvent({ event, api });
 	}
 
 	api.analytics.subscribe('all_events', async (event) => {
