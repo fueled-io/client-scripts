@@ -4,6 +4,12 @@
 	let fueledReady = false;
 
 	function loadScript(src) {
+		const link = document.createElement('link');
+		link.href = src;
+		link.as = 'script';
+		link.rel = 'preload';
+		document.head.appendChild(link);
+
 		const script = document.createElement('script');
 		script.src = src;
 		script.async = true;
