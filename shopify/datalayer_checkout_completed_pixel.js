@@ -1,3 +1,11 @@
+((gtmContainerId) => {
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer', gtmContainerId);
+})('GTM-XXXXXXX');  
+
 analytics.subscribe("checkout_completed", (event) => {
   const checkout = event.data?.checkout;
   const ordersCount = api.init.data?.customer?.ordersCount || 0;
@@ -24,6 +32,7 @@ analytics.subscribe("checkout_completed", (event) => {
   };
 
   const orderData = {
+    shop_name: api.init.data.shop.name ?? null,
     checkout_id: checkout.token ?? null,
     order_id: checkout.order?.id ?? null,
     revenue: checkout.totalPrice?.amount ?? 0,
@@ -33,10 +42,11 @@ analytics.subscribe("checkout_completed", (event) => {
     order_subtotal: checkout.subtotalPrice?.amount ?? 0,
     order_line_items_subtotal: checkout.subtotalPrice?.amount ?? 0,
     ...(coupon && { coupon }),
-    discount_amount: 0,
+    discount_amount: checkout.discountsAmount?.amount ?? 0,
     order_total_product_count: (checkout.lineItems || []).reduce((acc, item) => {
       return acc + (item.quantity ?? 0);
     }, 0),
+    includes_subscription: (checkout.lineItems || []).some((item) => item?.sellingPlanAllocation?.sellingPlan?.id),
   };
 
   const itemsData = (checkout.lineItems || []).map((lineItem) => {
@@ -51,7 +61,8 @@ analytics.subscribe("checkout_completed", (event) => {
       price: lineItem.variant?.price?.amount ?? 0,
       original_price: lineItem.variant?.price?.amount ?? 0,
       quantity: lineItem.quantity ?? 0,
-      subscription_line_item: false,
+      line_item_discount: lineItem.discountAllocations.reduce((acc, item) => acc + item.amount.amount, 0),
+      subscription_line_item: lineItem?.sellingPlanAllocation?.sellingPlan?.id ? true : false,
     };
   });
 
