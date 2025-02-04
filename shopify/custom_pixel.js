@@ -10,26 +10,27 @@
  */
 const trackEvents = [
   //'product_added_to_cart', /* Uncomment this event if you have disabled Fueled's standard "Add to Cart" tracking in our app configuration. */
-  'checkout_started', /* This event fires an "Initiate Checkout" event for Facebook Pixel/CAPI. */
-  'checkout_contact_info_submitted', /* This event fires an identify() event that improves match data. */
-  'checkout_address_info_submitted', /* This event fires an identify() event that improves match data. */
-  'payment_info_submitted', /* This event fires an "Add Payment Info" event into GA4 and FB. */
-  'checkout_completed', /* This event fires an Identify event into GA4 and FB. */
-  'checkout_shipping_info_submitted' /* This event fires checkoutShippingInfoSubmitted track event */
+  "checkout_started" /* This event fires an "Initiate Checkout" event for Facebook Pixel/CAPI. */,
+  "checkout_contact_info_submitted" /* This event fires an identify() event that improves match data. */,
+  "checkout_address_info_submitted" /* This event fires an identify() event that improves match data. */,
+  "payment_info_submitted" /* This event fires an "Add Payment Info" event into GA4 and FB. */,
+  "checkout_completed" /* This event fires an Identify event into GA4 and FB. */,
+  "checkout_shipping_info_submitted" /* This event fires checkoutShippingInfoSubmitted track event */,
 ];
 
 /**
  * Possible events:
  * checkout_started
  */
-const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unless you have disabled Fueled's server-side event tracking entirely. */
+const ga4ExcludedEvents = [
+  "checkout_started",
+]; /* Leave this setting as is, unless you have disabled Fueled's server-side event tracking entirely. */
 
 /**
  * Do not touch any of the code below.
  */
 
 ((configs) => {
-
   const events = [];
   let scriptLoaded = false;
   let fueledReady = false;
@@ -42,36 +43,34 @@ const ga4ExcludedEvents = ['checkout_started']; /* Leave this setting as is, unl
   }
 
   function trackEvent(event) {
-    const options = ga4ExcludedEvents.includes(event.name) ? {
-      plugins: {
-        all: true,
-        "google-analytics": false,
-      }
-    } : null;
+    const options = ga4ExcludedEvents.includes(event.name)
+      ? {
+          plugins: {
+            all: true,
+            "google-analytics": false,
+          },
+        }
+      : null;
 
     window.fueled.customPixel.trackEvent(event, options, init);
   }
 
-  configs.trackEvents.forEach(eventName => {
+  configs.trackEvents.forEach((eventName) => {
     analytics.subscribe(eventName, async (event) => {
-      if (!scriptLoaded)
-        loadScript(`/apps/fueled/client.js?page=custom_pixel&rand=1`);
+      if (!scriptLoaded) loadScript(`/apps/fueled/client.js?page=custom_pixel&rand=1`);
 
-      if (fueledReady)
-        trackEvent(event);
-      else
-        events.push(event);
+      if (fueledReady) trackEvent(event);
+      else events.push(event);
     });
   });
 
   window.addEventListener("fueled-shopify-ready", () => {
     if (!fueledReady) {
       fueledReady = true;
-      events.forEach(event => trackEvent(event));
+      events.forEach((event) => trackEvent(event));
     }
   });
-
 })({
   trackEvents,
-  ga4ExcludedEvents
+  ga4ExcludedEvents,
 });
