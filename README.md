@@ -10,8 +10,7 @@ To learn more about Fueled's architecture, event specifications, and features, p
 
 #### Using A Custom Pixel For Tracking Add_To_Cart Events
 
-* See: [Custom Pixel For Tracking ATC Events](https://learn.fueled.io/ga4-connector-for-shopify/custom-pixel)
-* **As of October 2023**, this [script](https://github.com/fueled-io/client-scripts/blob/main/shopify/custom_pixel_add_to_cart.txt) has been deprecated. See our ['custom_pixel.js'](https://github.com/fueled-io/client-scripts/blob/main/shopify/custom_pixel.js) file instead.
+* See: https://learn.fueled.io/apps/shopify/shopify-event-tracking/custom-pixel
 
 ## BigCommerce Scripts
 
