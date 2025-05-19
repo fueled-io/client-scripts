@@ -1,3 +1,5 @@
+const ga4ExcludedEvents = ["checkout_started"];
+
 (() => {
 	const events = [];
 	let scriptLoaded = false;
@@ -18,7 +20,16 @@
 	}
 
 	function trackEvent(event) {
-		window.fueled.customPixelV2.trackEvent({ event, api });
+      const options = ga4ExcludedEvents.includes(event.name)
+        ? {
+            plugins: {
+              all: true,
+              "google-analytics": false,
+            },
+          }
+        : null;
+
+		window.fueled.customPixelV2.trackEvent({ event, api, options });
 	}
 
 	api.analytics.subscribe('all_events', async (event) => {
