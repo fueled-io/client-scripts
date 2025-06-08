@@ -94,4 +94,8 @@ analytics.subscribe("checkout_completed", async (event) => {
     event: "orderDataLoaded",
     fueled: window.dataLayer.fueled,
   });
+  window.dataLayer.push({
+    event: "purchase",
+    fueled: window.dataLayer.fueled,
+  });
 });
