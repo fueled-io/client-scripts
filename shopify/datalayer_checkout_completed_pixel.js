@@ -1,17 +1,31 @@
-((gtmContainerId) => {
-  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer', gtmContainerId);
-})('GTM-XXXXXXX');  
+analytics.subscribe("checkout_completed", async (event) => {
+  await new Promise((r, _j) => {
+    const w = window;
+    const d = document;
+    const s = "script";
+    const l = "dataLayer";
+    const i = "GTM-XXXXXXX";
 
-analytics.subscribe("checkout_completed", (event) => {
+    w[l] = w[l] || [];
+    w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+    var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s),
+      dl = l !== "dataLayer" ? "&l=" + l : "";
+    j.async = true;
+    j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+    j.addEventListener("load", () => {
+      r();
+    });
+    j.addEventListener("error", () => {
+      j();
+    });
+    f.parentNode.insertBefore(j, f);
+  });
+
   const checkout = event.data?.checkout;
   const ordersCount = api.init.data?.customer?.ordersCount || 0;
   const isNewCustomer = checkout.order?.customer?.isFirstOrder || Number(ordersCount) === 1;
-  const coupon = (checkout?.discountApplications || [])
-    .map((item) => item.title).join(",");
+  const coupon = (checkout?.discountApplications || []).map((item) => item.title).join(",");
 
   const customerData = {
     customer_id: checkout.order?.customer?.id ?? null,
@@ -67,7 +81,7 @@ analytics.subscribe("checkout_completed", (event) => {
   });
 
   window.dataLayer = window.dataLayer || [];
-  
+
   // Add additional data to the dataLayer['fueled'] object
   window.dataLayer.fueled = {
     customer: customerData,
@@ -80,6 +94,8 @@ analytics.subscribe("checkout_completed", (event) => {
     event: "orderDataLoaded",
     fueled: window.dataLayer.fueled,
   });
+  window.dataLayer.push({
+    event: "purchase",
+    fueled: window.dataLayer.fueled,
+  });
 });
-
-
