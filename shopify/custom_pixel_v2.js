@@ -20,8 +20,7 @@ const ga4ExcludedEvents = ["checkout_started"];
 	}
 
 	function trackEvent(event) {
-      const options = ga4ExcludedEvents.includes(event.name)
-        ? {
+      const options = ga4ExcludedEvents.includes(event.name) ? {
             plugins: {
               all: true,
               "google-analytics": false,
