@@ -1,8 +1,7 @@
 const services = {
   facebook: {
-    enabled: true,
     config: {
-      pixelId: "260707709672501",
+      pixelId: {{your_pixel_id}},
       valueField: "subtotal",
       contentIdPurchase: "product_id",
       contentTypePurchase: "product_group",
@@ -326,12 +325,10 @@ const utils = {
 const initializedServices = new Set();
 analytics.subscribe("checkout_completed", async (event) => {
   for (const service of Object.values(services)) {
-    if (service.enabled) {
-      if (!initializedServices.has(service)) {
-        await service.loadScript();
-        await service.init(event);
-        initializedServices.add(service);
-      }
+    if (!initializedServices.has(service)) {
+      await service.loadScript();
+      await service.init(event);
+      initializedServices.add(service);
       await service.handler(event);
     }
   }
