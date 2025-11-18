@@ -1,4 +1,4 @@
-const ga4ExcludedEvents = ["checkout_started"];
+const ga4ExcludedEvents = [];
 
 (() => {
 	const events = [];
