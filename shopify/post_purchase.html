@@ -1,12 +1,29 @@
 <script>
-  Shopify.on("CheckoutAmended", function (newOrder, previousOrder) {
-    window.addEventListener("fueled-shopify-ready", async () => {
+  (() => {
+    if (!window?.Shopify?.pageUrl) {
+      return;
+    }
+
+    const shopDomain = new URL(window.Shopify.pageUrl).host;
+    const fueledUrl = new URL("https://mb-cdn.fueled.io/shopify/client.js");
+    fueledUrl.searchParams.append("page", "post_purchase");
+    fueledUrl.searchParams.append("shop", shopDomain);
+
+    const script = document.createElement("script");
+    script.src = fueledUrl.toString();
+    script.async = true;
+    document.head.append(script);
+
+    Shopify.on("CheckoutAmended", function (newOrder, previousOrder) {
+      if (!window?.Shopify?.pageUrl) {
+        return;
+      }
+
       const ordersCount = newOrder.customer.ordersCount;
       const totalSpent = newOrder.customer.totalSpent;
       const externalCustomerId = newOrder.customer.id;
 
-      const url = new URL(document.location.href);
-      url.searchParams.delete("hmac");
+      const url = new URL(window.Shopify.pageUrl);
 
       const customer = {
         name: [newOrder.customer.firstName, newOrder.customer.lastName].filter((item) => !!item).join(" "),
@@ -51,25 +68,20 @@
         referrer: document.referrer,
       };
 
-      try {
-        if (window.fueled) {
+      const trackEvent = async () => {
+        try {
           await window.fueled.identify(customer);
           await window.fueled.orderUpsellCompleted(postPurchaseEvent);
-        } else {
-          console.warn("Fueled tracking not initialized");
+        } catch (error) {
+          console.error("Error sending tracking events:", error);
         }
-      } catch (error) {
-        console.error("Error sending tracking events:", error);
+      };
+
+      if (window.fueled) {
+        trackEvent();
+      } else {
+        window.addEventListener("fueled-shopify-ready", trackEvent);
       }
     });
-
-    const fueledUrl = new URL("https://mb-cdn.fueled.io/shopify/client.js");
-    fueledUrl.searchParams.append("page", "post_purchase");
-    fueledUrl.searchParams.append("shop", "SPECIFY_SHOP_DOMAIN");
-
-    const script = document.createElement("script");
-    script.src = fueledUrl.toString();
-    script.async = true;
-    document.head.append(script);
-  });
+  })();
 </script>
