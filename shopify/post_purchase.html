@@ -51,8 +51,16 @@
         referrer: document.referrer,
       };
 
-      await window.fueled.identify(customer);
-      await window.fueled.orderUpsellCompleted(postPurchaseEvent);
+      try {
+        if (window.fueled) {
+          await window.fueled.identify(customer);
+          await window.fueled.orderUpsellCompleted(postPurchaseEvent);
+        } else {
+          console.warn("Fueled tracking not initialized");
+        }
+      } catch (error) {
+        console.error("Error sending tracking events:", error);
+      }
     });
 
     const fueledUrl = new URL("https://mb-cdn.fueled.io/shopify/client.js");
