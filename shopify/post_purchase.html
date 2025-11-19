@@ -12,7 +12,7 @@
         name: [newOrder.customer.firstName, newOrder.customer.lastName].filter((item) => !!item).join(" "),
         ...(externalCustomerId ? { externalCustomerId: String(externalCustomerId) } : {}),
         email: newOrder.customer.email,
-        fistName: newOrder.customer.firstName,
+        firstName: newOrder.customer.firstName,
         lastName: newOrder.customer.lastName,
         visitorType: externalCustomerId ? "logged_in" : "guest",
         orderCount: ordersCount,
