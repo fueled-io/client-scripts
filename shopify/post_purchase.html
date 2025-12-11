@@ -1,0 +1,87 @@
+<script>
+  (() => {
+    if (!window?.Shopify?.pageUrl) {
+      return;
+    }
+
+    const shopDomain = new URL(window.Shopify.pageUrl).host;
+    const fueledUrl = new URL("https://mb-cdn.fueled.io/shopify/client.js");
+    fueledUrl.searchParams.append("page", "post_purchase");
+    fueledUrl.searchParams.append("shop", shopDomain);
+
+    const script = document.createElement("script");
+    script.src = fueledUrl.toString();
+    script.async = true;
+    document.head.append(script);
+
+    Shopify.on("CheckoutAmended", function (newOrder, previousOrder) {
+      if (!window?.Shopify?.pageUrl) {
+        return;
+      }
+
+      const ordersCount = newOrder.customer.ordersCount;
+      const totalSpent = newOrder.customer.totalSpent;
+      const externalCustomerId = newOrder.customer.id;
+
+      const url = new URL(window.Shopify.pageUrl);
+
+      const customer = {
+        name: [newOrder.customer.firstName, newOrder.customer.lastName].filter((item) => !!item).join(" "),
+        ...(externalCustomerId ? { externalCustomerId: String(externalCustomerId) } : {}),
+        email: newOrder.customer.email,
+        firstName: newOrder.customer.firstName,
+        lastName: newOrder.customer.lastName,
+        visitorType: externalCustomerId ? "logged_in" : "guest",
+        orderCount: ordersCount,
+      };
+
+      const postPurchaseEvent = {
+        products: newOrder.lineItems.map((lineItem, index) => ({
+          product_id: String(lineItem.product.id),
+          variantId: String(lineItem.variant.id),
+          name: lineItem.title,
+          sku: lineItem.variant.sku,
+          variant: lineItem.title,
+          variantName: lineItem.title,
+          quantity: lineItem.quantity,
+          category: lineItem.product.type,
+          price: Number(lineItem.price),
+          currency: newOrder.currency,
+          position: index + 1,
+        })),
+        affiliation: "web",
+        checkout_url: url.toString(),
+        checkout_id: newOrder.checkoutToken,
+        currency: newOrder.currency,
+        total: Number(newOrder.totalPrice),
+        value: Number(newOrder.subtotalPrice),
+        subtotal: Number(newOrder.subtotalPrice),
+        discount: newOrder.discounts?.reduce((acc, cV) => acc + Number(cV.amount), 0) ?? 0,
+        coupon: newOrder.discounts?.map((item) => item.code)?.join(",") ?? "",
+        order_id: String(newOrder.id),
+        timestamp: new Date().getTime(),
+        ...(typeof ordersCount === "number" ? { customer_order_count: ordersCount } : {}),
+        ...(totalSpent ? { customer_lifetime_value: Number(totalSpent) } : {}),
+        ...(typeof ordersCount === "number" ? { new_customer: ordersCount === 1 } : {}),
+        url: url.toString(),
+        path: url.pathname,
+        referrer: document.referrer,
+      };
+
+      const trackEvent = async () => {
+        try {
+          await window.fueled.identify(customer);
+          await window.fueled.orderUpsellCompleted(postPurchaseEvent);
+        } catch (error) {
+          console.error("Error sending tracking events:", error);
+        }
+      };
+
+      if (window.fueled) {
+        trackEvent();
+      } else {
+        window.addEventListener("fueled-shopify-ready", trackEvent);
+      }
+    });
+  })();
+</script>
