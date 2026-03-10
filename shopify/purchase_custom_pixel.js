@@ -59,6 +59,7 @@ const services = {
         })),
         content_type: this.config.contentTypePurchase,
         value,
+        discount: Number(checkoutData.discountsAmount?.amount ?? 0),
         order_id: utils.shopifyGidToId(checkoutData?.order?.id),
         num_items: (checkoutData?.lineItems || []).reduce((sum, item) => sum + (item.quantity || 0), 0),
       };
