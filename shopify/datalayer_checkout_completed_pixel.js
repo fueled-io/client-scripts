@@ -13,12 +13,12 @@ analytics.subscribe("checkout_completed", async (event) => {
       dl = l !== "dataLayer" ? "&l=" + l : "";
     j.async = true;
     j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
-    j.addEventListener("load", () => {
+    j.onload = () => {
       r();
-    });
-    j.addEventListener("error", () => {
-      j();
-    });
+    };
+    j.onerror = (err) => {
+      _j(err || new Error("Failed to load GTM script"));
+    };
     f.parentNode.insertBefore(j, f);
   });
 
